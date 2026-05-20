@@ -2,19 +2,19 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Permitir lectura y escritura pública a los vehículos.
     match /vehiculos/{vehicleId} {
       allow read, write: if true;
     }
     
-    // Configuración global (como el precio de la gasolina).
-    // Permitimos acceso público para lectura y escritura en este MVP.
     match /config/{document=**} {
       allow read, write: if true;
     }
     
-    // Regla explícita para el documento de configuración general.
     match /config/general {
+      allow read, write: if true;
+    }
+
+    match /quote_history/{docId} {
       allow read, write: if true;
     }
   }
