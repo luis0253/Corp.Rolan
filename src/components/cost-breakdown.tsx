@@ -369,12 +369,12 @@ export function CostBreakdown({ result, isLoading, setQuoteResult }: CostBreakdo
           <span className="font-headline text-2xl">{formatCurrency(result.total)}</span>
         </div>
         <div className="space-y-2">
-          <Label htmlFor="clientName">Nombre del Cliente</Label>
+          <Label htmlFor="clientName"># Lead</Label>
           <div className="relative">
             <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
               id="clientName"
-              placeholder="Escriba el nombre completo..."
+              placeholder="Escriba el numero del Lead..."
               value={clientName}
               onChange={(e) => setClientName(e.target.value)}
               className="pl-10"
