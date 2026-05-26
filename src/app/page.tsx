@@ -45,6 +45,58 @@ export default function Home() {
   useEffect(() => {
     setIsClient(true);
     // Pre-load gas price into cache
+    const raw = localStorage.getItem('quote_prefill');
+    if (raw) {
+      localStorage.removeItem('quote_prefill');
+      try {
+        const q = JSON.parse(raw);
+        const rehydrate = (iso: string | null) => iso ? new Date(iso) : null;
+        const isAdvanced = q.itinerary && q.itinerary.length > 1;
+
+        const restored = {
+          ...q,
+          departureDateTime: rehydrate(q.departureDateTime),
+          returnDateTime: rehydrate(q.returnDateTime),
+          destinationArrivalDateTime: rehydrate(q.destinationArrivalDateTime),
+          originArrivalDateTime: rehydrate(q.originArrivalDateTime),
+          itinerary: q.itinerary?.map((leg: any) => ({
+            ...leg,
+            departureTime: rehydrate(leg.departureTime),
+            arrivalTime: rehydrate(leg.arrivalTime),
+          })) ?? [],
+        };
+
+        setQuoteResult(restored);
+        setActiveTab(isAdvanced ? 'advanced' : 'simple');
+
+        setTimeout(() => {
+          if (isAdvanced) {
+            advancedFormRef.current?.reset({
+              origin: q.origin,
+              departureDateTime: rehydrate(q.departureDateTime) ?? new Date(),
+              people: q.people,
+              stops: q.itinerary?.slice(0, -1).map((leg: any) => ({
+                destination: leg.destination,
+                departureDateTime: rehydrate(leg.arrivalTime) ?? new Date(),
+                tipoCamino: leg.tipoCamino ?? 'pista',
+              })) ?? [],
+            });
+          } else {
+            simpleFormRef.current?.reset({
+              origin: q.origin,
+              destination: q.destination,
+              people: q.people,
+              departureDateTime: rehydrate(q.departureDateTime) ?? new Date(),
+              returnDateTime: rehydrate(q.returnDateTime) ?? new Date(),
+              tipoCamino: q.tipoCamino ?? 'pista',
+              vehicleId: q.vehicleId,
+            });
+          }
+        }, 150);
+      } catch (e) {
+        console.error('Error restaurando cotización:', e);
+      }
+    }
     loadGasPrice();
 
     const loadMapsAPI = async () => {

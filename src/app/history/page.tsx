@@ -12,6 +12,8 @@ import { ArrowLeft, ArrowRight, Clock, Loader2, User, Search, ChevronDown, Chevr
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { clientTypeFactors } from '@/lib/pricing-factors';
 import { Input } from '@/components/ui/input';
+import { useRouter } from 'next/navigation';
+import { Copy } from 'lucide-react';
 
 const formatCurrency = (amount: number) =>
     new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(amount);
@@ -36,6 +38,24 @@ const BreakdownItem = ({ label, value, className }: { label: string; value: stri
 
 function QuoteCard({ quote }: { quote: any }) {
     const [isOpen, setIsOpen] = useState(false);
+    const router = useRouter();
+
+    const handleReusar = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        localStorage.setItem('quote_prefill', JSON.stringify({
+            ...quote,
+            departureDateTime: quote.departureDateTime?.toISOString?.() ?? null,
+            returnDateTime: quote.returnDateTime?.toISOString?.() ?? null,
+            destinationArrivalDateTime: quote.destinationArrivalDateTime?.toISOString?.() ?? null,
+            originArrivalDateTime: quote.originArrivalDateTime?.toISOString?.() ?? null,
+            itinerary: quote.itinerary?.map((leg: any) => ({
+                ...leg,
+                departureTime: leg.departureTime?.toISOString?.() ?? null,
+                arrivalTime: leg.arrivalTime?.toISOString?.() ?? null,
+            })) ?? [],
+        }));
+        router.push('/');
+    };
     const clientFactor = clientTypeFactors.find(f => f.id === quote.tipoCliente);
     const costoRentaAjustada = quote.costoRenta * (quote.ajusteClienteFactor || 1);
 
@@ -60,6 +80,10 @@ function QuoteCard({ quote }: { quote: any }) {
                     </div>
                     <div className="flex items-center gap-3 shrink-0 ml-3">
                         <span className="font-headline font-bold text-lg text-primary">{formatCurrency(quote.total || 0)}</span>
+                        <Button size="sm" variant="outline" className="shrink-0" onClick={handleReusar}>
+                            <Copy className="h-3 w-3 mr-1" />
+                            Reusar
+                        </Button>
                         {isOpen ? <ChevronUp className="h-4 w-4 text-muted-foreground" /> : <ChevronDown className="h-4 w-4 text-muted-foreground" />}
                     </div>
                 </div>

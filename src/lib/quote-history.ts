@@ -20,10 +20,15 @@ function serializeResult(result: QuoteResult) {
 }
 
 export async function saveQuoteToHistory(result: QuoteResult, clientName: string) {
+  const serialized = serializeResult(result);
+  delete (serialized as any).clientName;
+  delete (serialized as any).id;
+  delete (serialized as any).createdAt;
+
   const docRef = await addDoc(collection(db, 'quote_history'), {
     clientName: clientName || '',
     createdAt: Timestamp.now(),
-    ...serializeResult(result),
+    ...serialized,
   });
   return docRef.id;
 }
